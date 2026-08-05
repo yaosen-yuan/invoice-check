@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>統一發票中獎查詢</title>
+<style>
+  :root{
+    --navy:#1A305E;
+    --blue:#2B63AF;
+    --teal:#58C0C6;
+    --white:#FFFFFF;
+    --paper-line:#E3E8EF;
+    --dash:#D9E0EA;
+    --grey:#5A6B85;
+    --faint:#94A3B8;
+    --on-navy:#AFC3DE;
+    --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono","Roboto Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--navy);color:var(--white);font-family:var(--sans);
+    -webkit-text-size-adjust:100%;min-height:100vh;
+    padding:34px 18px calc(44px + env(safe-area-inset-bottom));
+    display:flex;justify-content:center;
+  }
+  .wrap{width:100%;max-width:420px}
+
+  h1{font-size:23px;font-weight:600;line-height:1.3;margin:0}
+  .period{color:var(--teal);font-size:13px;letter-spacing:.06em;margin:6px 0 0}
+  .lede{color:var(--on-navy);font-size:13px;line-height:1.8;margin:14px 0 0}
+
+  .card{background:var(--white);border-radius:12px;margin:20px 0 0;overflow:hidden}
+  .card-top{padding:20px 18px}
+  label{display:block;color:var(--grey);font-size:11px;letter-spacing:.14em;margin:0 0 9px}
+  input{
+    width:100%;border:0;border-bottom:2px solid var(--blue);background:transparent;
+    color:var(--navy);font-family:var(--mono);font-size:24px;
+    font-variant-numeric:tabular-nums;letter-spacing:.05em;
+    padding:2px 0 9px;border-radius:0;
+  }
+  input::placeholder{color:#C3CBD6}
+  input:focus{outline:none}
+  input:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+  .hint{min-height:18px;font-size:12.5px;color:#B0472C;line-height:1.5;margin:9px 0 0}
+  button{
+    width:100%;margin:14px 0 0;padding:14px;border:0;border-radius:8px;
+    background:var(--blue);color:var(--white);font-family:var(--sans);
+    font-size:15px;font-weight:600;letter-spacing:.12em;cursor:pointer;
+  }
+  button:disabled{background:#8CA3C4;cursor:default}
+  button:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+
+  .stub{overflow:hidden;max-height:0;transition:max-height .45s cubic-bezier(.22,.7,.2,1)}
+  .stub.open{max-height:1400px}
+  .stub-inner{
+    border-top:2px dashed var(--dash);margin:0 18px;padding:18px 0 22px;
+    opacity:0;transform:translateY(-8px);
+    transition:opacity .4s .1s ease-out,transform .4s .1s ease-out;
+  }
+  .stub.open .stub-inner{opacity:1;transform:none}
+
+  .res-title{color:var(--navy);font-size:17px;font-weight:600;margin:0}
+  .total{display:flex;align-items:baseline;gap:9px;margin:8px 0 0}
+  .total span{color:var(--grey);font-size:12.5px}
+  .total strong{
+    color:var(--navy);font-family:var(--mono);font-size:27px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .rule{height:3px;width:44px;background:var(--teal);border-radius:2px;margin:11px 0 0}
+
+  .item{border-top:1px solid var(--paper-line);margin:14px 0 0;padding:11px 0 0}
+  .item:first-of-type{margin-top:16px}
+  .item-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .item-date{color:var(--grey);font-family:var(--mono);font-size:13.5px}
+  .item-amt{
+    color:var(--navy);font-family:var(--mono);font-size:16px;font-weight:600;
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .item-no{color:var(--faint);font-family:var(--mono);font-size:11.5px;margin:3px 0 0;letter-spacing:.04em}
+
+  .deadline{color:var(--grey);font-size:12.5px;margin:18px 0 0}
+  .claim{color:var(--grey);font-size:12.5px;line-height:1.75;margin:6px 0 0}
+  .claim a{color:var(--blue);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  .claim a:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:2px}
+  .miss-body{color:var(--grey);font-size:13px;line-height:1.8;margin:8px 0 0}
+
+  .glass{
+    background:rgba(255,255,255,.075);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:12px;padding:16px 17px 17px;margin:20px 0 0;
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  }
+  .tip{color:#D3E0F1;font-size:12.5px;line-height:1.85;margin:0}
+  .info{margin:16px 0 0;padding:15px 0 0;border-top:1px solid rgba(255,255,255,.11)}
+  .info-h{color:var(--teal);font-size:13px;font-weight:600;margin:0}
+  .info-b{color:#D3E0F1;font-size:12.5px;line-height:1.9;margin:5px 0 0}
+  .info-l{color:#D3E0F1;font-size:12.5px;line-height:1.9;margin:5px 0 0;padding-left:19px}
+  .info-l li{margin:0 0 4px}
+  .info-l li::marker{color:#8FA6C4}
+  @media (prefers-reduced-motion:reduce){.stub,.stub-inner{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>統一發票中獎查詢</h1>
+  <p class="period" id="period">—</p>
+  <p class="lede">老闆可輸入實名制綁定的發票手機號碼查詢中獎發票。</p>
+
+  <div class="card">
+    <div class="card-top">
+      <label for="phone">手機號碼</label>
+      <input id="phone" type="tel" inputmode="numeric" autocomplete="tel"
+             maxlength="13" placeholder="0912345678" aria-describedby="hint">
+      <p class="hint" id="hint" role="status" aria-live="polite"></p>
+      <button id="go">查詢</button>
+    </div>
+    <div class="stub" id="stub"><div class="stub-inner" id="out"></div></div>
+  </div>
+
+  <div class="glass">
+    <p class="tip">📌 若系統查詢後未顯示中獎金額，即代表本期未中獎。</p>
+
+    <div class="info">
+      <p class="info-h">🛎️ 領獎期間：</p>
+      <p class="info-b">自115年8月6日起至115年11月5日前至全家便利商店列印中獎發票,以免影響領獎權益。</p>
+    </div>
+
+    <div class="info">
+      <p class="info-h">📋 本站免責聲明：</p>
+      <ol class="info-l">
+        <li>查詢在你的手機上完成，號碼不會被傳送或留存。</li>
+        <li>本服務僅供中獎紀錄查詢，實際兌獎資格以財政部規定為準。</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ 設定區：每期只需要改這一塊 ═══════════════════════════
+   1. PERIOD      期別，顯示在標題下方
+   2. DEADLINE    領獎截止日
+   3. CLAIM_NOTE  領獎方式說明，可含 HTML 連結
+   4. SALT        每期換一組新的，舊名單即自動失效
+   5. ITERATIONS  加密強度，須與轉檔工具一致
+   6. WINNERS     由 build-list.html 產生後整段貼上
+   ═══════════════════════════════════════════════════════ */
+const CONFIG = {
+  PERIOD:     "115 年 5–6 月期",
+  DEADLINE:   "2026/11/05",
+  CLAIM_NOTE: '請至財政部電子發票整合平台查詢（<a href="https://www.einvoice.nat.gov.tw/portal/btc/btc500w/main" target="_blank" rel="noopener noreferrer">點我</a>）',
+  SALT:       "okok-inv-115-0506",
+  ITERATIONS: 250000
+};
+
+const WINNERS = {
+  "c0dcd6dc176fa844aa2168d9e89f39c7": [{"d":"2026/05/01","a":500,"n":"BR33868705"}],
+  "d141a18bfc2537c70c726a5b14800cd6": [{"d":"2026/05/01","a":500,"n":"BR33868753"}],
+  "06ff0329440ceb3d7b978f67a6b3ca54": [{"d":"2026/05/02","a":200,"n":"BR33868937"}],
+  "7e3f5412ba031b46d3378b72346e3769": [{"d":"2026/05/02","a":500,"n":"BR33869018"}],
+  "0950e31e03bf3e7119b52ec8950689f5": [{"d":"2026/05/02","a":200,"n":"BR33869106"}],
+  "9b2b28f5fc1d85892f90446fe438154c": [{"d":"2026/05/03","a":200,"n":"BR33869333"}],
+  "1d91067900a7e3d5eea4d44cc57c1a1b": [{"d":"2026/05/04","a":500,"n":"BR33869828"}],
+  "45d6d43e1b06df0c7d22ff8b7fa6982d": [{"d":"2026/05/04","a":500,"n":"BR33869920"}],
+  "573cd8e822a66e56030cae1ba60e0302": [{"d":"2026/05/04","a":1000,"n":"BR33869937"}],
+  "c8ad9586a432625ed01d53b5d3dee5cc": [{"d":"2026/05/05","a":200,"n":"BR33870106"},{"d":"2026/05/08","a":500,"n":"BR33871870"}],
+  "f77e3c08152b4f10482ebf88d28f567b": [{"d":"2026/05/05","a":500,"n":"BR33870327"}],
+  "76f5eb112a8162c294271f86dc7d422c": [{"d":"2026/05/05","a":200,"n":"BR33870333"},{"d":"2026/05/15","a":200,"n":"BR33874937"}],
+  "2338b188d4e72e31541e977a85351b2c": [{"d":"2026/05/05","a":500,"n":"BR33870480"}],
+  "8295225c0b77e7150b78fad4c7104c2c": [{"d":"2026/05/06","a":500,"n":"BR33870657"}],
+  "b349d59247d5517a1db5db9015720292": [{"d":"2026/05/06","a":500,"n":"BR33870664"}],
+  "d28727587f422509d5fb748d3a162816": [{"d":"2026/05/06","a":200,"n":"BR33870937"}],
+  "1443d6c0cbd8b29d84e2886f648e3100": [{"d":"2026/05/06","a":500,"n":"BR33871042"}],
+  "b485942897e2ee6ad180a206027664fe": [{"d":"2026/05/07","a":1000,"n":"BR33871106"},{"d":"2026/05/17","a":500,"n":"BR33876057"}],
+  "cd29a56ef57df05dae703896c5a0e87c": [{"d":"2026/05/07","a":500,"n":"BR33871300"}],
+  "2eb3f75bd56858910efcb11be5c4deaa": [{"d":"2026/05/07","a":200,"n":"BR33871333"},{"d":"2026/05/08","a":500,"n":"BR33871953"}],
+  "3c633dd8e78c12a7bf4d50a3e39ef5b0": [{"d":"2026/05/08","a":500,"n":"BR33871551"}],
+  "c95eb5374d1c4bc0d144d58f634d8379": [{"d":"2026/05/08","a":500,"n":"BR33871762"}],
+  "048618f4708acd65dc414cfd4c6754b6": [{"d":"2026/05/08","a":500,"n":"BR33871789"}],
+  "e71a33c468f486950168a28f39c58792": [{"d":"2026/05/08","a":200,"n":"BR33871937"},{"d":"2026/06/10","a":500,"n":"BR33886161"}],
+  "dc7508c85df3848d9ef6fc7be969ff47": [{"d":"2026/05/09","a":200,"n":"BR33872106"}],
+  "fdc1f9034dc1f5aaef2001a8a746ac78": [{"d":"2026/05/09","a":800,"n":"BR33872255"}],
+  "1f4fa030b9fed39cf62d87d38ee722ea": [{"d":"2026/05/09","a":200,"n":"BR33872333"}],
+  "39940d820eeee68bbf96d58b5ec34ab0": [{"d":"2026/05/10","a":500,"n":"BR33872635"}],
+  "ce6e2f5528299cf5ab3eabf3a61c1c76": [{"d":"2026/05/10","a":500,"n":"BR33872659"}],
+  "9d97fb008870d24424f6451eb4bde347": [{"d":"2026/05/10","a":200,"n":"BR33872937"}],
+  "3dadf7d853b6f934023e442f5a0fd491": [{"d":"2026/05/11","a":200,"n":"BR33873106"}],
+  "1623f5ecb40f44fdc43277a1fe52c2ea": [{"d":"2026/05/11","a":500,"n":"BR33873326"}],
+  "ac2e66ccc543f29a919167405814a2e8": [{"d":"2026/05/11","a":1000,"n":"BR33873333"},{"d":"2026/05/16","a":500,"n":"BR33875583"},{"d":"2026/06/13","a":200,"n":"BR33887333"},{"d":"2026/06/30","a":500,"n":"BR33894294"}],
+  "4d639ca115bb885f44204442b7b32157": [{"d":"2026/05/12","a":500,"n":"BR33873621"}],
+  "34d00958f62ede7f67122f5458dbe0a0": [{"d":"2026/05/12","a":500,"n":"BR33873827"},{"d":"2026/06/25","a":500,"n":"BR33892348"}],
+  "b3c70e83a38f82da421ba6811c11040f": [{"d":"2026/05/12","a":200,"n":"BR33873937"},{"d":"2026/06/06","a":500,"n":"BR33884231"}],
+  "a993255cc5bf31f622461f11dd996262": [{"d":"2026/05/12","a":500,"n":"BR33873993"}],
+  "1f0f1e7c838a02ba1ef006799a5c0021": [{"d":"2026/05/13","a":200,"n":"BR33874106"}],
+  "9ec4b988a36e299e89183485b6a55322": [{"d":"2026/05/13","a":200,"n":"BR33874333"}],
+  "b95b297415de37de392976e2f276a866": [{"d":"2026/05/13","a":500,"n":"BR33874469"}],
+  "417b1a4f1e40f421cf7a1be1e4cfafb5": [{"d":"2026/05/14","a":500,"n":"BR33874562"}],
+  "a36678129c9a3b9b8cae2fb5bae5781b": [{"d":"2026/05/14","a":500,"n":"BR33874706"}],
+  "2a92f1b220d2987de9e769a5ef99cead": [{"d":"2026/05/15","a":500,"n":"BR33874942"},{"d":"2026/06/05","a":200,"n":"BR33883937"}],
+  "ea3fcadeb79357e87c4a8744fc592bbb": [{"d":"2026/05/15","a":500,"n":"BR33875032"}],
+  "03c1566ab8fff451621cea35221b0465": [{"d":"2026/05/15","a":200,"n":"BR33875106"}],
+  "05fa419c9c3e5cbd16d692f05cc41ebb": [{"d":"2026/05/15","a":500,"n":"BR33875147"}],
+  "ba559ad11f2959c2a5a70a65c5376ab4": [{"d":"2026/05/15","a":500,"n":"BR33875160"}],
+  "70d5c8a7d3c5f97325895bcb2edf0de7": [{"d":"2026/05/15","a":500,"n":"BR33875164"}],
+  "a4fa44075283cf7f07e8c1e1c0fb56c6": [{"d":"2026/05/15","a":200,"n":"BR33875333"}],
+  "3802bba3933f777ee6520429cb82ef2f": [{"d":"2026/05/15","a":500,"n":"BR33875397"},{"d":"2026/06/26","a":500,"n":"BR33892952"}],
+  "0713a97a3656ccb8808212824d61eb86": [{"d":"2026/05/15","a":500,"n":"BR33875412"}],
+  "1079d8daf6028ba856ea73fb1f32e1d4": [{"d":"2026/05/16","a":500,"n":"BR33875465"}],
+  "80c51b013562bc2b3f118c4acaf6ae1e": [{"d":"2026/05/16","a":500,"n":"BR33875614"}],
+  "19224cdb956f95badf3bd22cf5f7bc65": [{"d":"2026/05/16","a":500,"n":"BR33875657"},{"d":"2026/06/01","a":200,"n":"BR33882333"}],
+  "f53519c526dc8b1924d2f640e03ed479": [{"d":"2026/05/17","a":200,"n":"BR33875937"}],
+  "09bcef2e8a5e6014417102d1275a57bb": [{"d":"2026/05/17","a":200,"n":"BR33876106"},{"d":"2026/05/22","a":200,"n":"BR33878333"}],
+  "fed1a1e41c3a947e476e6e4641105317": [{"d":"2026/05/17","a":500,"n":"BR33876158"}],
+  "910625bf9e3bb18e803de28dde481076": [{"d":"2026/05/17","a":500,"n":"BR33876327"}],
+  "e7737a23875339d971b3f59db00cfc5f": [{"d":"2026/05/17","a":200,"n":"BR33876333"}],
+  "e00025dec501caa750489a5389515d25": [{"d":"2026/05/18","a":500,"n":"BR33876648"}],
+  "c7b9bb3372c8e15e1fa9273db541e08b": [{"d":"2026/05/19","a":200,"n":"BR33876937"}],
+  "9c01bab5c3c071787688ade9c2e11c96": [{"d":"2026/05/19","a":200,"n":"BR33877106"}],
+  "daeb701c15fd7c587b0c90daee16ebd4": [{"d":"2026/05/19","a":500,"n":"BR33877151"}],
+  "1b7a210b79d9f06ca7a9c069f1298261": [{"d":"2026/05/20","a":500,"n":"BR33877290"}],
+  "237b44420d2e23423225acf3733e4306": [{"d":"2026/05/20","a":200,"n":"BR33877333"}],
+  "39ea3adbb50b3e45a0c7267dacfbb17c": [{"d":"2026/05/20","a":500,"n":"BR33877457"}],
+  "afabf8d4cb28779fbf90551e8934e992": [{"d":"2026/05/20","a":500,"n":"BR33877595"},{"d":"2026/06/13","a":500,"n":"BR33887626"},{"d":"2026/06/27","a":500,"n":"BR33893231"}],
+  "780b3f58a162e37dca30067c394164db": [{"d":"2026/05/21","a":500,"n":"BR33877930"},{"d":"2026/05/22","a":500,"n":"BR33878325"}],
+  "0be01e78a57422d50ae5ea922c323569": [{"d":"2026/05/21","a":200,"n":"BR33877937"}],
+  "92f98aa8842ab857fc364a13d45fc9e9": [{"d":"2026/05/21","a":200,"n":"BR33878106"},{"d":"2026/05/25","a":500,"n":"BR33879585"}],
+  "83b2c360f0daa89b9800b1fb70d256da": [{"d":"2026/05/23","a":500,"n":"BR33878757"}],
+  "187f129983f654b823abf6e2fd48ded5": [{"d":"2026/05/23","a":200,"n":"BR33878937"}],
+  "2854c68b0c5f30d9b26c8d0cfadec8b3": [{"d":"2026/05/24","a":500,"n":"BR33878982"},{"d":"2026/06/03","a":500,"n":"BR33883365"}],
+  "c2ea8fbd3f674b3ccf33e908b43ee72f": [{"d":"2026/05/24","a":500,"n":"BR33879028"}],
+  "54c3bd481abe9a126770e4e80da951ef": [{"d":"2026/05/24","a":500,"n":"BR33879074"},{"d":"2026/06/11","a":500,"n":"BR33886652"},{"d":"2026/06/19","a":200,"n":"BR33890106"}],
+  "637c5eda7a99af00ebd6b6a25cacd7f7": [{"d":"2026/05/24","a":200,"n":"BR33879106"}],
+  "a4ec0250c56f45a4dff81b60e85b2a74": [{"d":"2026/05/24","a":500,"n":"BR33879313"}],
+  "75d11c07039eb13c92905ba0fadf0581": [{"d":"2026/05/24","a":200,"n":"BR33879333"}],
+  "75253c34dc6155e8bbe79c727bb4a882": [{"d":"2026/05/26","a":500,"n":"BR33879858"}],
+  "ba8b37451c13f1a930a1e106752a4b79": [{"d":"2026/05/26","a":500,"n":"BR33879928"}],
+  "919aa874917190a601ca19bfce6cbaa2": [{"d":"2026/05/26","a":1000,"n":"BR33879937"}],
+  "96f16af1bab2c01c3bcc42936ffe9808": [{"d":"2026/05/26","a":200,"n":"BR33880106"}],
+  "9bcd1f0e4f75888eb3e3d122cea5d770": [{"d":"2026/05/27","a":500,"n":"BR33880297"}],
+  "0bd2e176ef1f076d1080d2deb4e04ed3": [{"d":"2026/05/27","a":200,"n":"BR33880333"}],
+  "fc1dbd68ce2ebabb741a1c0dc0f508a7": [{"d":"2026/05/28","a":500,"n":"BR33880932"}],
+  "d92d41e7bb35f1c3c6d232cd0194eca1": [{"d":"2026/05/28","a":200,"n":"BR33880937"}],
+  "b1fca0bdfecbc2c660095a997a4ff026": [{"d":"2026/05/29","a":500,"n":"BR33881012"}],
+  "ba365ef685edbfb2c2962e5840909206": [{"d":"2026/05/29","a":1000,"n":"BR33881106"}],
+  "ce05b3c5f84e9c2a0747191e0d99079f": [{"d":"2026/05/29","a":500,"n":"BR33881187"}],
+  "77fc02d282419c7473d08e1f047a983a": [{"d":"2026/05/30","a":200,"n":"BR33881333"}],
+  "b663d43b1d60e06b6a858bfbe6821048": [{"d":"2026/05/31","a":500,"n":"BR33881808"}],
+  "a8560516d94212e1041139708abebdbd": [{"d":"2026/05/31","a":200,"n":"BR33881937"}],
+  "bc950ef930f1a7b934781a6740a3b665": [{"d":"2026/05/31","a":200,"n":"BR33882106"}],
+  "9c564577fd4605d8d2f3914b48511340": [{"d":"2026/05/31","a":500,"n":"BR33882174"}],
+  "9e4bd37d6be59a20e8c5a5eb2b25e5bb": [{"d":"2026/06/01","a":500,"n":"BR33882346"}],
+  "e7a7ce15178944cf04b6b68c047d9996": [{"d":"2026/06/01","a":500,"n":"BR33882536"},{"d":"2026/06/20","a":200,"n":"BR33890333"}],
+  "0a79217fa0e7c1b953dd86fc25fb5efe": [{"d":"2026/06/02","a":200,"n":"BR33882937"}],
+  "f6338ddb9c6649a89b27edabd97bf402": [{"d":"2026/06/03","a":200,"n":"BR33883106"}],
+  "56fd624b2054070cde8c808dadc6fb15": [{"d":"2026/06/03","a":1000,"n":"BR33883333"}],
+  "8bfbc3b41eb32f9b18fe0d58b16cb7d6": [{"d":"2026/06/04","a":500,"n":"BR33883471"}],
+  "0884afe6e3e14924cc85cc5e9ece5fb0": [{"d":"2026/06/04","a":500,"n":"BR33883654"}],
+  "5ce12350a638118cc507aa9d7988f969": [{"d":"2026/06/04","a":500,"n":"BR33883718"}],
+  "3fb0741c2fb5f77f4f5d4c82a270a593": [{"d":"2026/06/05","a":500,"n":"BR33883984"}],
+  "858cd332aed64ca21939235082795b30": [{"d":"2026/06/05","a":200,"n":"BR33884106"}],
+  "caed3434fa9f368f7f7b173d5733a2df": [{"d":"2026/06/06","a":200,"n":"BR33884333"}],
+  "7b0e96da362b901deebe0a15b0e28081": [{"d":"2026/06/07","a":500,"n":"BR33884792"}],
+  "4009634e23dbe63b69166a3089b4f97f": [{"d":"2026/06/07","a":200,"n":"BR33884937"}],
+  "8c7716f362448148ea81d21154c27832": [{"d":"2026/06/08","a":200,"n":"BR33885106"}],
+  "c6be8939811db68558718868f0d5be1b": [{"d":"2026/06/08","a":200,"n":"BR33885333"}],
+  "697f4f085c7be8ad6c4ce42eba3fec8c": [{"d":"2026/06/08","a":500,"n":"BR33885346"}],
+  "49936f013cb0e4c1539f6f5fed8f46dd": [{"d":"2026/06/10","a":200,"n":"BR33885937"},{"d":"2026/06/10","a":500,"n":"BR33885990"}],
+  "067fc8a5bd047ac6ca50d35b00cf55c2": [{"d":"2026/06/10","a":200,"n":"BR33886106"}],
+  "0864d272b290965053c9ce2b216cbb10": [{"d":"2026/06/10","a":200,"n":"BR33886333"}],
+  "813c58e9bf8a617f0d6f03785f7f90a3": [{"d":"2026/06/11","a":500,"n":"BR33886486"}],
+  "79030bfe53b1e4e402ee54df92de154a": [{"d":"2026/06/12","a":200,"n":"BR33886937"}],
+  "f5acba51c8689ca7b12370573ae28a6f": [{"d":"2026/06/12","a":200,"n":"BR33887106"}],
+  "6b627ad1862772d3aef78915f3bb5284": [{"d":"2026/06/12","a":500,"n":"BR33887191"}],
+  "5919c160e278e90a3c7ea4e6a62980e0": [{"d":"2026/06/14","a":500,"n":"BR33887926"}],
+  "d6bdfc78f430900e55f4508ac1ac8289": [{"d":"2026/06/14","a":200,"n":"BR33887937"}],
+  "b41ce269aca96cdd0cd4634cf4005334": [{"d":"2026/06/15","a":200,"n":"BR33888106"}],
+  "f6cce9373f789d5a3a2aee0648f1e808": [{"d":"2026/06/15","a":500,"n":"BR33888141"}],
+  "c137339f02aefaf35ab37e4ffcdddf56": [{"d":"2026/06/15","a":200,"n":"BR33888333"}],
+  "2214e3e27bca529f07fc9cdab8c7c3fc": [{"d":"2026/06/15","a":500,"n":"BR33888460"}],
+  "01e1d5233090605e285240af1a6c96f8": [{"d":"2026/06/16","a":500,"n":"BR33888781"},{"d":"2026/06/21","a":200,"n":"BR33890937"}],
+  "60f794b79bb9e7cb93bce3f336c424bc": [{"d":"2026/06/16","a":200,"n":"BR33888937"}],
+  "79cb7cc82290c38a818f8b065487db87": [{"d":"2026/06/17","a":500,"n":"BR33889103"}],
+  "dcd40b9378f45fd57bba9865ab47d3bb": [{"d":"2026/06/17","a":200,"n":"BR33889106"}],
+  "93daecd2277caa3e4755bc0feb29a6e2": [{"d":"2026/06/17","a":200,"n":"BR33889333"}],
+  "8f47bfa2bde38ffcf8e112e7f41635e7": [{"d":"2026/06/19","a":4000,"n":"BR33889937"}],
+  "174f2d5e5c30bdf3d20002422e87c42a": [{"d":"2026/06/19","a":500,"n":"BR33890073"}],
+  "144d1ce63252776bba0071c1311d17d9": [{"d":"2026/06/19","a":500,"n":"BR33890178"}],
+  "5d9d8a4979ea2a7f95a92a2c87c66400": [{"d":"2026/06/19","a":500,"n":"BR33890179"}],
+  "d0d9ea0dcd26a1838ba6b5fabdc42e6b": [{"d":"2026/06/20","a":500,"n":"BR33890439"}],
+  "021715f4333ab7e16440e202659de749": [{"d":"2026/06/22","a":1000,"n":"BR33891106"}],
+  "d692561d76b9a81ae517a7af976a5ba0": [{"d":"2026/06/22","a":200,"n":"BR33891333"}],
+  "44f76532ece30a75ee2fa1cc7001bc54": [{"d":"2026/06/23","a":500,"n":"BR33891755"}],
+  "b5584087933d954ebd7ed091c902c480": [{"d":"2026/06/24","a":200,"n":"BR33891937"}],
+  "8008e0564b461f095e42a65c11638412": [{"d":"2026/06/24","a":200,"n":"BR33892106"}],
+  "94e83be08e18e9eca80aecc9e57a1dc3": [{"d":"2026/06/25","a":500,"n":"BR33892279"}],
+  "27076eeec597116333f6360abcfa2d87": [{"d":"2026/06/25","a":200,"n":"BR33892333"}],
+  "0e0a26c350686e9567162a7823110724": [{"d":"2026/06/25","a":800,"n":"BR33892602"}],
+  "9eda89d72ebd4463523a0249de35eaed": [{"d":"2026/06/26","a":200,"n":"BR33892937"}],
+  "56d0a23c9daf00e9edfbfc6b64e936ff": [{"d":"2026/06/27","a":200,"n":"BR33893106"}],
+  "7b4f2c02fbda83d422bcbc09ad7753c8": [{"d":"2026/06/27","a":1000,"n":"BR33893333"}],
+  "90b964845ed552699c0c0c4973cab977": [{"d":"2026/06/28","a":500,"n":"BR33893630"}],
+  "3fa09b298144bab9c5d154f9e0aa89f1": [{"d":"2026/06/28","a":500,"n":"BR33893749"}],
+  "8f3fe9bfe6ea1b9d46850566dbaf07c8": [{"d":"2026/06/29","a":500,"n":"BR33893865"}],
+  "e103627157e009956a37ed02e1d40a97": [{"d":"2026/06/29","a":500,"n":"BR33893924"}],
+  "a2f52c0bbe648b02caf5d410907c79f7": [{"d":"2026/06/29","a":200,"n":"BR33893937"}],
+  "6a9b34b32b38eac6c82d67c7c09650ac": [{"d":"2026/06/29","a":500,"n":"BR33894074"}],
+  "c46970923c7f6f9c2fc0ef1c436c66e3": [{"d":"2026/06/30","a":500,"n":"BR33894328"}],
+  "b57100a31352f55916a4c3bcacf03961": [{"d":"2026/06/30","a":200,"n":"BR33894333"}]
+};
+
+/* ═══ 以下為程式邏輯，換期時不需要更動 ══════════════════ */
+const $ = id => document.getElementById(id);
+$("period").textContent = CONFIG.PERIOD;
+
+let busy = false;
+
+function normalize(raw){
+  let d = String(raw).replace(/\D/g,"");
+  if (d.length === 12 && d.startsWith("8869")) d = "0" + d.slice(3);
+  return d;
+}
+function mask(p){ return p.slice(0,4) + "-***-" + p.slice(-3); }
+function money(n){ return "NT$ " + n.toLocaleString("en-US"); }
+
+async function hashPhone(phone){
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(phone), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name:"PBKDF2", salt:enc.encode(CONFIG.SALT),
+      iterations:CONFIG.ITERATIONS, hash:"SHA-256" }, key, 128);
+  return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+function show(html){ $("out").innerHTML = html; $("stub").classList.add("open"); }
+
+function renderHit(list){
+  const total = list.reduce((s,r) => s + r.a, 0);
+  const items = list.map(r => `
+    <div class="item">
+      <div class="item-row">
+        <span class="item-date">${r.d}</span>
+        <span class="item-amt">${money(r.a)}</span>
+      </div>
+      <div class="item-no">${r.n}</div>
+    </div>`).join("");
+  show(`
+    <p class="res-title">恭喜，這期中了 ${list.length} 張</p>
+    <div class="total"><span>合計</span><strong>${money(total)}</strong></div>
+    <div class="rule"></div>
+    ${items}
+    <p class="deadline">領獎截止 ${CONFIG.DEADLINE}</p>
+    <p class="claim">${CONFIG.CLAIM_NOTE}</p>`);
+}
+
+function renderMiss(){
+  show(`
+    <p class="res-title">這期沒有中獎</p>
+    <p class="miss-body">若你確定收到中獎通知，請確認號碼與收到簡訊的號碼相同，或在 LINE 直接傳訊息給我們。</p>`);
+}
+
+async function run(){
+  if (busy) return;
+  const phone = normalize($("phone").value);
+
+  if (!/^09\d{8}$/.test(phone)){
+    $("hint").textContent = "請輸入 10 位數手機號碼，例如 0912345678";
+    $("stub").classList.remove("open");
+    return;
+  }
+
+  busy = true;
+  $("hint").textContent = "";
+  $("go").disabled = true;
+  $("go").textContent = "查詢中…";
+  $("stub").classList.remove("open");
+
+  const hit = WINNERS[await hashPhone(phone)];
+  hit ? renderHit(hit) : renderMiss();
+
+  $("go").disabled = false;
+  $("go").textContent = "查詢";
+  busy = false;
+}
+
+$("go").addEventListener("click", run);
+$("phone").addEventListener("keydown", e => { if (e.key === "Enter") run(); });
+$("phone").addEventListener("input", () => { $("hint").textContent = ""; });
+</script>
+</body>
+</html>
